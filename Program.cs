@@ -1,6 +1,8 @@
 using HospitalManagement;
 using HospitalManagement.DataAccess;
+using HospitalManagement.DataAccess.Entities;
 using HospitalManagement.Middlewares;
+using HospitalManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
