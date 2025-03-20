@@ -5,8 +5,9 @@ using HospitalManagement.Repository;
 using HospitalManagement.Repository.Interfaces;
 using HospitalManagement.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc; 
 using Microsoft.Extensions.Options;
+using Serilog.Context;
 using System.Runtime.CompilerServices;
 
 namespace HospitalManagement.Controllers
@@ -19,22 +20,32 @@ namespace HospitalManagement.Controllers
         private readonly IPatientRepository _context;
         private readonly IAppointmentService _appointmentService;
         private readonly IAppointmentRepository _appointmentRepository;
+        private readonly ILogger<PatientsController> _logger;
 
         public PatientsController(
             IOptions<DoctorsSettings> workTime, 
             IPatientRepository patientRepo, 
             IAppointmentService appointmentService, 
-            IAppointmentRepository appointmentRepository) 
+            IAppointmentRepository appointmentRepository,
+            ILogger<PatientsController> logger) 
         {
             _workTime = workTime.Value;
             _context = patientRepo;
             _appointmentService = appointmentService;
             _appointmentRepository = appointmentRepository;
+            _logger = logger;
         }
 
         [HttpGet("get-all-patients")]
         public IActionResult GetAll()
         {
+            using (LogContext.PushProperty("PatientId", 1))
+            {
+                _logger.LogInformation("Hello!");
+
+                _logger.LogError("Hello!");
+            }
+
             var patients = _context.GetAll();
 
             return Ok(patients);

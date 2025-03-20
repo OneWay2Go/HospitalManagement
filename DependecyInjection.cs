@@ -1,5 +1,6 @@
 ﻿using HospitalManagement.DataAccess;
 using HospitalManagement.DataAccess.Entities;
+using HospitalManagement.Middlewares;
 using HospitalManagement.Repository;
 using HospitalManagement.Repository.Interfaces;
 using HospitalManagement.Services;
@@ -21,6 +22,8 @@ namespace HospitalManagement
             services.Configure<DoctorsSettings>(configuration.GetSection("DoctorsSettings"));
             services.Configure<AppointmentSettings>(configuration.GetSection("AppointmentSettings"));
             services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddTransient<ConfigurationValidationMiddleware>();
+            services.AddTransient<CorrelationIdLoggingMiddleware>();
 
             services.AddDbContext<HospitalContext>(options =>
             {
