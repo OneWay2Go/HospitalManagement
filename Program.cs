@@ -48,4 +48,9 @@ app.UseMiddleware<CorrelationIdLoggingMiddleware>();
 
 app.MapControllers();
 
+app.Run(async context =>
+{
+    context.Response.WriteAsync("type /swagger after localhost!");
+});
+
 app.Run();

@@ -39,13 +39,6 @@ namespace HospitalManagement.Controllers
         [HttpGet("get-all-patients")]
         public IActionResult GetAll()
         {
-            using (LogContext.PushProperty("PatientId", 1))
-            {
-                _logger.LogInformation("Hello!");
-
-                _logger.LogError("Hello!");
-            }
-
             var patients = _context.GetAll();
 
             return Ok(patients);
