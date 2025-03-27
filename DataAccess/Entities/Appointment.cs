@@ -15,4 +15,8 @@ public class Appointment
     public int PatientId { get; set; }
 
     public Patient Patient { get; set; }
+
+    public DateTime StartTime { get; set; }
+
+    public DateTime EndTime { get; set; }
 }

@@ -6,7 +6,7 @@ namespace HospitalManagement.Services
 {
     public interface IAppointmentService
     {
-        bool CancelAppointment(DateTime appointmentDate, DateTime requestDate);
+        //bool CancelAppointment(DateTime appointmentDate, DateTime requestDate);
         Appointment? GetById(int id);
     }
     public class AppointmentService : IAppointmentService

@@ -9,7 +9,7 @@
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)  
         {
             Console.WriteLine($"Executing: {context.Request.Path}");
 

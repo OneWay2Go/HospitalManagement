@@ -14,6 +14,7 @@ namespace HospitalManagement
     {
         public static IServiceCollection AddDependecies(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddScoped<IPatientService, PatientService>();
             services.AddScoped<IDoctorRepository, DoctorRepository>();
             services.AddScoped<IDoctorService, DoctorService>();
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();

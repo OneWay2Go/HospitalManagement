@@ -5,6 +5,7 @@ using HospitalManagement.Middlewares;
 using HospitalManagement.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,9 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, configuration) =>
 {
     configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Seq("http://localhost:5341");
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Seq("http://localhost:5341");
 });
 
 builder.Services.AddControllers();
@@ -26,6 +27,8 @@ builder.Services.AddSwaggerGen();
 var configuration = builder.Configuration;
 
 builder.Services.AddDependecies(configuration);
+
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
 
@@ -47,10 +50,5 @@ app.UseMiddleware<ConfigurationValidationMiddleware>();
 app.UseMiddleware<CorrelationIdLoggingMiddleware>();
 
 app.MapControllers();
-
-app.Run(async context =>
-{
-    context.Response.WriteAsync("type /swagger after localhost!");
-});
 
 app.Run();

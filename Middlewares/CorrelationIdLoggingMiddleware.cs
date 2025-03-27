@@ -18,7 +18,7 @@ namespace HospitalManagement.Middlewares
                 { "CorrelationId", Guid.NewGuid().ToString() }
             };
 
-            using (_logger.BeginScope(scope["CorrelationId"]))
+            using (_logger.BeginScope(scope))
             {
                 await next(context);
             }

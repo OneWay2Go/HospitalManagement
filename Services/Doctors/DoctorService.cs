@@ -1,4 +1,6 @@
-﻿using HospitalManagement.Dtos;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using HospitalManagement.Dtos;
 using HospitalManagement.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +16,12 @@ namespace HospitalManagement.Services.Doctors
     public class DoctorService : IDoctorService
     {
         private readonly IDoctorRepository _doctorRepository;
+        private readonly IMapper _mapper;
 
-        public DoctorService(IDoctorRepository doctorRepository)
+        public DoctorService(IDoctorRepository doctorRepository, IMapper mapper)
         {
             _doctorRepository = doctorRepository;
+            _mapper = mapper;
         }
 
         public async Task CreateDoctorAsync(CreateDoctorDto doctorDto)
@@ -30,13 +34,7 @@ namespace HospitalManagement.Services.Doctors
 
         public IList<DoctorDto> GetAllDoctors()
         {
-            return _doctorRepository.GetAll().AsNoTracking().Select(r => new DoctorDto
-            {
-                DoctorId = r.DoctorId,
-                FirstName = r.FirstName,
-                LastName = r.LastName,
-                SpecialityId = r.SpecialityId
-            }).ToList();
+            return _doctorRepository.GetAll().AsNoTracking().ProjectTo<DoctorDto>(_mapper.ConfigurationProvider).ToList();
         }
     }
 }

@@ -1,13 +1,16 @@
-﻿using HospitalManagement.DataAccess;
+﻿using AutoMapper;
+using HospitalManagement.DataAccess;
 using HospitalManagement.DataAccess.Entities;
 using HospitalManagement.Dtos;
 using HospitalManagement.Repository;
 using HospitalManagement.Repository.Interfaces;
 using HospitalManagement.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc; 
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 
 namespace HospitalManagement.Controllers
@@ -17,31 +20,47 @@ namespace HospitalManagement.Controllers
     public class PatientsController : ControllerBase
     {
         private readonly DoctorsSettings _workTime;
-        private readonly IPatientRepository _context;
+        private readonly HospitalContext _context;
         private readonly IAppointmentService _appointmentService;
         private readonly IAppointmentRepository _appointmentRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<PatientsController> _logger;
+        private readonly AppointmentSettings _settings;
+        private readonly IPatientService _patientService;
 
         public PatientsController(
+            IOptions<AppointmentSettings> settings,
             IOptions<DoctorsSettings> workTime, 
-            IPatientRepository patientRepo, 
+            HospitalContext context, 
             IAppointmentService appointmentService, 
             IAppointmentRepository appointmentRepository,
-            ILogger<PatientsController> logger) 
+            IMapper mapper,
+            IPatientService patientService,
+            ILogger<PatientsController> logger)
         {
             _workTime = workTime.Value;
-            _context = patientRepo;
+            _context = context;
             _appointmentService = appointmentService;
             _appointmentRepository = appointmentRepository;
+            _mapper = mapper;
             _logger = logger;
+            _settings = settings.Value;
+            _patientService = patientService;
         }
 
         [HttpGet("get-all-patients")]
         public IActionResult GetAll()
         {
-            var patients = _context.GetAll();
+            var patientsDto = _patientService.GetPatients().ToList();
 
-            return Ok(patients);
+            //IList<PatientDto> patientDtos = new List<PatientDto>();
+
+            //foreach(var patient in patients)
+            //{
+            //    patientDtos.Add(_mapper.Map<PatientDto>(patient));
+            //}
+
+            return Ok(patientsDto);
         }
 
         [HttpPost("arrange-appointments")]
@@ -79,8 +98,10 @@ namespace HospitalManagement.Controllers
                 return NotFound($"There is no appointment with id - {request.AppointmentId}");
             }
 
-            bool canCancel = _appointmentService.CancelAppointment(appointment.AppointmentDate, DateTime.Now);
+            DateTime deadline = appointment.AppointmentDate.AddHours(-_settings.CancellationDeadlineHours);
 
+            bool canCancel = DateTime.Now <= deadline ? true : false;
+                
             if (!canCancel)
             {
                 return BadRequest("Can not cancel appointment due to the deadline!");
