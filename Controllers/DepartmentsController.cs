@@ -1,5 +1,6 @@
 ﻿using HospitalManagement.Application.Commands.CreateDepartment;
 using HospitalManagement.Application.Commands.DeleteDepartment;
+using HospitalManagement.Application.Commands.UpdateDepartment;
 using HospitalManagement.Application.Queries.GetAllDepartments;
 using HospitalManagement.Application.Queries.GetDepartmentById;
 using MediatR;
@@ -47,6 +48,14 @@ namespace HospitalManagement.Controllers
         public async Task<IActionResult> DeleteDepartment([FromRoute]int id)
         {
             await _sender.Send(new DeleteDepartmentCommand(id));
+
+            return Ok();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateDepartment([FromRoute]int id)
+        {
+            await _sender.Send(new UpdateDepartmentCommand(id));
 
             return Ok();
         }

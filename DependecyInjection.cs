@@ -30,6 +30,7 @@ namespace HospitalManagement
             services.AddTransient<ConfigurationValidationMiddleware>();
             services.AddTransient<CorrelationIdLoggingMiddleware>();
             services.AddMemoryCache();
+            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 
             services.AddDbContext<HospitalContext>(options =>
             {
