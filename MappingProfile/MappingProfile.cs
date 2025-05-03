@@ -15,6 +15,8 @@ namespace HospitalManagement.MappingProfile
                 .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
                 .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth.ToString()))
                 .ForMember(dest => dest.BlankIdentifier, opt => opt.MapFrom(src => src.PatientBlank.BlankIdentifier));
+
+            CreateMap<PatientDto, PatientDto>();
         }
     }
 }

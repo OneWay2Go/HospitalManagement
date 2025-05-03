@@ -11,6 +11,8 @@ namespace HospitalManagement.Services.Doctors
         Task CreateDoctorAsync(CreateDoctorDto doctorDto);
 
         IList<DoctorDto> GetAllDoctors();
+
+        DoctorDto GetDoctorById(int id);
     }
 
     public class DoctorService : IDoctorService
@@ -35,6 +37,15 @@ namespace HospitalManagement.Services.Doctors
         public IList<DoctorDto> GetAllDoctors()
         {
             return _doctorRepository.GetAll().AsNoTracking().ProjectTo<DoctorDto>(_mapper.ConfigurationProvider).ToList();
+        }
+
+        public DoctorDto GetDoctorById(int id)
+        {
+            var doctor = _doctorRepository.GetById(id);
+
+            var doctorDto = _mapper.Map<DoctorDto>(doctor);
+
+            return doctorDto;
         }
     }
 }

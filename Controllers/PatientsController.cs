@@ -7,7 +7,9 @@ using HospitalManagement.Repository.Interfaces;
 using HospitalManagement.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
 using System.Runtime;
@@ -27,6 +29,7 @@ namespace HospitalManagement.Controllers
         private readonly ILogger<PatientsController> _logger;
         private readonly AppointmentSettings _settings;
         private readonly IPatientService _patientService;
+        private readonly IDistributedCache _cache;
 
         public PatientsController(
             IOptions<AppointmentSettings> settings,
@@ -36,7 +39,8 @@ namespace HospitalManagement.Controllers
             IAppointmentRepository appointmentRepository,
             IMapper mapper,
             IPatientService patientService,
-            ILogger<PatientsController> logger)
+            ILogger<PatientsController> logger,
+            IDistributedCache cache)
         {
             _workTime = workTime.Value;
             _context = context;
@@ -46,9 +50,30 @@ namespace HospitalManagement.Controllers
             _logger = logger;
             _settings = settings.Value;
             _patientService = patientService;
+            _cache = cache;
+        }
+
+        [HttpPost("update-patient")]
+        public IActionResult UpdatePatient([FromBody] PatientDto patientDto)
+        {
+            var patient = _mapper.Map<Patient>(patientDto);
+
+            var patients = _context.Patients;
+
+            if (!patients.Any(p => p.PatientId == patient.PatientId))
+            {
+                throw new Exception("Patient not found!");
+            }
+
+            _context.Patients.Update(patient);
+
+            _context.SaveChanges();
+
+            return Ok();
         }
 
         [HttpGet("get-all-patients")]
+        //[EnableRateLimiting("fixed")] 
         public IActionResult GetAll()
         {
             var patientsDto = _patientService.GetPatients().ToList();
@@ -61,6 +86,35 @@ namespace HospitalManagement.Controllers
             //}
 
             return Ok(patientsDto);
+        }
+
+        [HttpGet("get-patient/{id}")]
+        public async Task<IActionResult> GetPatient([FromRoute]int id)
+        {
+            var cashedPatient = await _cache.GetStringAsync($"patient-{id}");
+
+            if (cashedPatient != null)
+            {
+                PatientDto patientDto = new PatientDto
+                {
+                    Fullname = cashedPatient,
+                    PatientId = id,
+                    DateOfBirth = null,
+                    BlankIdentifier = null
+                };
+                return Ok(patientDto);
+            }
+
+            var patient = await _patientService.GetPatientByIdAsync(id);
+
+            if (patient == null)
+            {
+                return NotFound($"There is no patient with id - {id}");
+            }
+
+            await _cache.SetStringAsync($"patient-{id}", patient.Fullname);
+
+            return Ok(patient);
         }
 
         [HttpPost("arrange-appointments")]

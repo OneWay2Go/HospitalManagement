@@ -15,9 +15,9 @@ public class Patient
 
     public DateOnly DateOfBirth { get; set; }
 
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
 
-    public DateTime RegisteredDate { get; set; }
+    public DateTime RegisteredDate { get; set; } = DateTime.UtcNow;
 
     public int? PatientBlankId { get; set; }
 
