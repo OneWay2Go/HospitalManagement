@@ -1,4 +1,5 @@
 using HospitalManagement;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,8 +20,33 @@ var configuration = builder.Configuration;
 
 builder.Services
     .AddEndpointsApiExplorer()
-    .AddSwaggerGen()
-    .AddDependecies(configuration);
+    .AddSwaggerGen(options =>
+    {
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+        {
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "Bearer"
+        });
+
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+    })
+    .AddDependecies(configuration)
+    .AddJwt();
 
 var app = builder.Build();
 
@@ -35,6 +61,7 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.AddMiddlewares();

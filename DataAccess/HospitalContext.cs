@@ -17,6 +17,8 @@ public class HospitalContext : DbContext
 
     public DbSet<Department> Departments { get; set; }
 
+    public DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Appointment>(builder =>

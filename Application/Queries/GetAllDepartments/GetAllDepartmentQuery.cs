@@ -2,6 +2,7 @@
 using HospitalManagement.Migrations;
 using HospitalManagement.Repository.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace HospitalManagement.Application.Queries.GetAllDepartments
 {
@@ -11,13 +12,13 @@ namespace HospitalManagement.Application.Queries.GetAllDepartments
 
     public class GetAllDepartmentQueryHandler(IDepartmentRepository departmentRepository) : IRequestHandler<GetAllDepartmentQuery, List<DepartmentDto>>
     {
-        public Task<List<DepartmentDto>> Handle(GetAllDepartmentQuery request, CancellationToken cancellationToken)
+        public async Task<List<DepartmentDto>> Handle(GetAllDepartmentQuery request, CancellationToken cancellationToken)
         {
-            var departments = departmentRepository.GetAll().ToList();
+            var departments = await departmentRepository.GetAll().ToListAsync();
 
-            var departmentsDto = departments.Select(d => d.ToDto());
+            var departmentsDto = departments.Select(d => d.ToDto()).ToList();
 
-            return (Task<List<DepartmentDto>>)departmentsDto;
+            return departmentsDto;
         }
     }
 }

@@ -1,16 +1,23 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using HospitalManagement.Application.Behaviors;
 using HospitalManagement.DataAccess;
 using HospitalManagement.DataAccess.Entities;
 using HospitalManagement.Middlewares;
 using HospitalManagement.Repository;
 using HospitalManagement.Repository.Interfaces;
 using HospitalManagement.Services;
+using HospitalManagement.Services.Auth;
 using HospitalManagement.Services.Doctors;
+using HospitalManagement.Services.Hasher;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Sats.PostgreSqlDistributedCache;
 using System.Reflection;
+using System.Text;
 
 namespace HospitalManagement
 {
@@ -31,6 +38,11 @@ namespace HospitalManagement
             services.AddTransient<CorrelationIdLoggingMiddleware>();
             services.AddMemoryCache();
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
 
             services.AddDbContext<HospitalContext>(options =>
             {
@@ -99,6 +111,32 @@ namespace HospitalManagement
             app.UseMiddleware<CorrelationIdLoggingMiddleware>();
 
             return app;
+        }
+
+        public static IServiceCollection AddJwt(this IServiceCollection services)
+        {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "hospital.uz",
+                    ValidAudience = "hospital.uz",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("x4p8z7Kk1AzpGUZLt/7Bpe0TVI9k2fYenUQvzXOlzXiHugkE3HQY2lCqyMqBA39YoHGPufNqNEFH7MRo6MPoM6gie60yjbjrZJ5b3YTw08ZFbmi0x5yvZlvCK/+NiOXftdWWKmwHCsuGTl0HE47Kaw1Ods9VhzoWLLdBEFbgvMsN1UjoajBZ1/vhch2UKw/MVAgferF0e5CT8Auvsm742eEKcuON8HLCm1guxkRS9xERNYFiVyGdZxthSQ9qGtX2U3SGj03OCl+ZiUgI87e/e16xBNmAZ8gndG3248Dbgm4kzDq6kzezW3gmkQksfhnBKUalg4JVSM1zNFoaRdzzCLpqa00F5NCgiUvzjICwDSM=\r\n"))
+                };
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(nameof(RoleType.Doctor), policy => policy.RequireClaim(nameof(RoleType.Doctor)));
+                options.AddPolicy(nameof(RoleType.Patient), policy => policy.RequireClaim(nameof(RoleType.Patient)));
+            });
+
+            return services;
         }
     }
 }

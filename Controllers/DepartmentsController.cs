@@ -36,7 +36,7 @@ namespace HospitalManagement.Controllers
             return Ok(departmentsDto);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetDepartmentById([FromRoute]int id)
         {
             var departmentDto = await _sender.Send(new GetDepartmentByIdQuery(id));
@@ -44,7 +44,7 @@ namespace HospitalManagement.Controllers
             return Ok(departmentDto);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDepartment([FromRoute]int id)
         {
             await _sender.Send(new DeleteDepartmentCommand(id));
@@ -52,7 +52,7 @@ namespace HospitalManagement.Controllers
             return Ok();
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDepartment([FromRoute]int id)
         {
             await _sender.Send(new UpdateDepartmentCommand(id));

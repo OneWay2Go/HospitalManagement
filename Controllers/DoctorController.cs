@@ -1,9 +1,11 @@
 ﻿using HospitalManagement.Application.Commands.CreateDoctor;
 using HospitalManagement.Application.Queries.GetAllDoctors;
+using HospitalManagement.DataAccess.Entities;
 using HospitalManagement.Dtos;
 using HospitalManagement.Filters;
 using HospitalManagement.Services.Doctors;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -11,6 +13,7 @@ namespace HospitalManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = nameof(RoleType.Doctor))]
     public class DoctorController : ControllerBase
     {
         private readonly IDoctorService _doctorService;

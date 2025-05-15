@@ -5,6 +5,7 @@ using HospitalManagement.Dtos;
 using HospitalManagement.Repository;
 using HospitalManagement.Repository.Interfaces;
 using HospitalManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -19,6 +20,7 @@ namespace HospitalManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = nameof(RoleType.Patient))]
     public class PatientsController : ControllerBase
     {
         private readonly DoctorsSettings _workTime;
